@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false
     },
     avatar: {
       type: String,
@@ -21,6 +22,11 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+// ✅ Ensure password is not returned by default
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
 const User = mongoose.model("User", userSchema);
 module.exports = User;
