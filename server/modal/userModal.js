@@ -13,11 +13,17 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: false
+      select: false,
     },
     avatar: {
-      type: String,
-      default: "",
+      image: {
+        type: String,
+        default: "",
+      },
+      public_id: {
+        type: String,
+        default: "",
+      },
     },
   },
   { timestamps: true }

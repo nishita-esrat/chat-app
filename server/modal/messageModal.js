@@ -20,9 +20,15 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    image: {
-      type: String,
-      default: "",
+    attachment: {
+      image: {
+        type: String,
+        default: "",
+      },
+      public_id: {
+        type: String,
+        default: "",
+      },
     },
     reactions: [
       {

@@ -1,6 +1,8 @@
 const User = require("../modal/userModal");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const cloudinaryDeleteImage = require("../utility/deleteImage");
+const cloudinaryUploadImage = require("../utility/uploadImage");
 
 // registration
 const registration = async (req, res) => {
@@ -128,4 +130,61 @@ const updatePassword = async (req, res) => {
   }
 };
 
-module.exports = { registration, login, logout, updatePassword };
+// update profile
+const updateProfile = async (req, res) => {
+  try {
+    const id = req.id;
+    const { image } = req.body;
+    if (!image) {
+      return res.status(401).json({
+        success: false,
+        message: "No image provided",
+      });
+    }
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    // If user has an existing avatar and public_id, delete the old image from Cloudinary
+    if (user.avatar && user.avatar.public_id) {
+      const deleteImage = await cloudinaryDeleteImage(user.avatar.public_id);
+      if (deleteImage !== "ok") {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to delete old image from Cloudinary",
+        });
+      }
+    }
+    // Upload new image to Cloudinary
+    const uploadedImage = await cloudinaryUploadImage(image, "avatar");
+    if (!uploadedImage || !uploadedImage.url || !uploadedImage.public_id) {
+      return res.status(500).json({
+        success: false,
+        message: "Image upload failed",
+      });
+    } // Update user avatar with new image details
+    user.avatar = {
+      image: uploadedImage.url,
+      public_id: uploadedImage.public_id,
+    };
+
+    // Save the updated user profile
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile image updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
+  }
+};
+
+module.exports = { registration, login, logout, updatePassword, updateProfile };
