@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -25,9 +26,29 @@ const userSchema = new mongoose.Schema(
         default: "",
       },
     },
+    reset_token: {
+      type: String,
+      default: "",
+    },
+    token_expiry: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
+
+// forgot password token
+userSchema.methods.getResetPasswordToken = function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  this.reset_token = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.token_expiry = Date.now() + 1 * 60 * 1000;
+  return resetToken;
+};
+
 // ✅ Ensure password is not returned by default
 userSchema.methods.toJSON = function () {
   const user = this.toObject();

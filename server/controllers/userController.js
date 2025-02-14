@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cloudinaryDeleteImage = require("../utility/deleteImage");
 const cloudinaryUploadImage = require("../utility/uploadImage");
+const sendEmail = require("../utility/mailTransporter");
+const crypto = require("crypto");
 
 // registration
 const registration = async (req, res) => {
@@ -187,4 +189,109 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { registration, login, logout, updatePassword, updateProfile };
+// forget password
+const forgetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "user not found",
+      });
+    }
+    const resetToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+    const resetPasswordUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/users/reset/${resetToken}`;
+    const message = `your reset password token is : \n\n ${resetPasswordUrl} \n\n if you have not requested this email then , please ignore it`;
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: "password recovery",
+        message,
+      });
+      return res.status(201).json({
+        success: true,
+        message: `Email sent to ${user.email} successfully`,
+      });
+    } catch (error) {
+      user.reset_token = undefined;
+      user.token_expiry = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(500).json({
+        success: false,
+        error: `Email sent to ${user.email} unsuccessfully`,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "server error",
+    });
+  }
+};
+
+// reset password
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Password is required",
+      });
+    }
+
+    const resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    const user = await User.findOne({
+      reset_token: resetPasswordToken,
+      token_expiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "reset password token is invalied or has been expired",
+      });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.reset_token = "";
+    user.token_expiry = null;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({
+      success: true,
+      message: "password updated",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "server error",
+    });
+  }
+};
+
+module.exports = {
+  registration,
+  login,
+  logout,
+  updatePassword,
+  updateProfile,
+  forgetPassword,
+  resetPassword,
+};
