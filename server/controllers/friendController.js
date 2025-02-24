@@ -139,4 +139,36 @@ const rejectedFriendReq = async (req, res) => {
   }
 };
 
-module.exports = { sendFriendReq, acceptedFriendReq, rejectedFriendReq };
+// get all friend
+const allFriendReq = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const friends = await Friend.find({ receiver_id: id, status: "pending" })
+      .populate({
+        path: "sender_id",
+        select: "name avatar.image",
+      })
+      .populate({
+        path: "receiver_id",
+        select: "name avatar.image",
+      });
+
+    return res.status(200).json({
+      success: true,
+      friends,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
+  }
+};
+
+module.exports = {
+  sendFriendReq,
+  acceptedFriendReq,
+  rejectedFriendReq,
+  allFriendReq,
+};
