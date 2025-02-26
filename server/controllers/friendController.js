@@ -42,7 +42,6 @@ const sendFriendReq = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Friend request sent successfully",
-      data: populatedRequest,
     });
   } catch (error) {
     res.status(500).json({
@@ -139,10 +138,10 @@ const rejectedFriendReq = async (req, res) => {
   }
 };
 
-// get all friend
+// get all friend request
 const allFriendReq = async (req, res) => {
   try {
-    const { id } = req.params;
+    const  id  = req.id;
 
     const friends = await Friend.find({ receiver_id: id, status: "pending" })
       .populate({
@@ -166,9 +165,32 @@ const allFriendReq = async (req, res) => {
   }
 };
 
+// get all friend
+const allFriends = async (req, res) => {
+  try {
+    const id = req.id;
+
+    const friends = await Friend.find({
+      $or: [{ sender_id: id }, { receiver_id: id }],
+      status: "accepted",
+    }).populate("sender_id receiver_id", "name avatar.image");
+
+    res.status(200).json({
+      success: true,
+      friends,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
+  }
+};
+
 module.exports = {
   sendFriendReq,
   acceptedFriendReq,
   rejectedFriendReq,
   allFriendReq,
+  allFriends,
 };
