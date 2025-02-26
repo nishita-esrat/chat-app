@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const dbConection = require("./db");
 const userRouters = require("./routers/userRoute");
 const friendRouters = require("./routers/friendRoute");
+const noteRouters = require("./routers/noteRoute");
 const cloudinary = require("./utility/cloudinaryConfig");
 const app = express();
 
@@ -10,8 +11,10 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
+
 // mongoose conection
 dbConection();
+
 
 // Add a simple test to check if Cloudinary is working
 cloudinary.api
@@ -25,6 +28,8 @@ cloudinary.api
 app.use("/api/v1/users", userRouters);
 // friend req router
 app.use("/api/v1/friends", friendRouters);
+// note router
+app.use("/api/v1/notes", noteRouters);
 
 
 
