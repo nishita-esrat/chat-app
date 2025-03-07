@@ -23,12 +23,10 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    is_read_by: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    is_read_by: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

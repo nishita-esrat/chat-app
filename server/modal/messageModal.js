@@ -44,10 +44,12 @@ const messageSchema = new mongoose.Schema(
         },
       },
     ],
-    is_seen: {
-      type: Boolean,
-      default: false,
-    },
+    is_seen: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

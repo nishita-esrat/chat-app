@@ -1,5 +1,5 @@
 const Friend = require("../modal/friendModal");
-const Notification = require("../modal/notificationModal");
+const { createNotification } = require("../utility/notifications");
 
 // sent friend request
 const sendFriendReq = async (req, res) => {
@@ -32,12 +32,12 @@ const sendFriendReq = async (req, res) => {
         select: "name avatar.image",
       });
 
-    const notification = await Notification.create({
-      recipients: [receiver_id],
+    const notification = await createNotification(
+      receiver_id,
       sender_id,
-      type: "friend_request",
-      content: `${populatedRequest.sender_id.name} sent you friend requested`,
-    });
+      "friend_request",
+      `${populatedRequest.sender_id.name} sent you friend requested`
+    );
 
     return res.status(201).json({
       success: true,
@@ -81,12 +81,12 @@ const acceptedFriendReq = async (req, res) => {
         select: "name avatar.image",
       });
 
-    const notification = await Notification.create({
-      recipients: [receiver_id],
+    const notification = await createNotification(
+      receiver_id,
       sender_id,
-      type: "friend_request",
-      content: `${populatedRequest.receiver_id.name} accepted your friend request`,
-    });
+      "friend_request",
+      `${populatedRequest.receiver_id.name} accepted your friend request`
+    );
 
     return res.status(201).json({
       success: true,
@@ -141,7 +141,7 @@ const rejectedFriendReq = async (req, res) => {
 // get all friend request
 const allFriendReq = async (req, res) => {
   try {
-    const  id  = req.id;
+    const id = req.id;
 
     const friends = await Friend.find({ receiver_id: id, status: "pending" })
       .populate({

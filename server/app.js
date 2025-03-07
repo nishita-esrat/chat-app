@@ -4,6 +4,7 @@ const dbConection = require("./db");
 const userRouters = require("./routers/userRoute");
 const friendRouters = require("./routers/friendRoute");
 const noteRouters = require("./routers/noteRoute");
+const messagesRouters = require("./routers/messageRoute");
 const cloudinary = require("./utility/cloudinaryConfig");
 const app = express();
 
@@ -30,6 +31,8 @@ app.use("/api/v1/users", userRouters);
 app.use("/api/v1/friends", friendRouters);
 // note router
 app.use("/api/v1/notes", noteRouters);
+// messaging router
+app.use("/api/v1/messages", messagesRouters);
 
 
 
