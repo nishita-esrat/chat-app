@@ -2,6 +2,7 @@ const cloudinaryUploadImage = require("../utility/uploadImage");
 const Conversation = require("../modal/conversationModal");
 const Message = require("../modal/messageModal");
 const { createNotification } = require("../utility/notifications");
+const cloudinaryDeleteImage = require("../utility/deleteImage");
 
 // send message
 const sendMessage = async (req, res) => {
@@ -115,7 +116,6 @@ const messageDelete = async (req, res) => {
     const { message_id } = req.params;
     const user_id = req.id; // Assuming req.id is the authenticated user's ID
 
-
     // Find the message first
     const message = await Message.findById(message_id);
     if (!message) {
@@ -123,7 +123,6 @@ const messageDelete = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Message not found" });
     }
-
 
     // Find the conversation
     const conversation = await Conversation.findById(message.conversation_id);
@@ -133,33 +132,43 @@ const messageDelete = async (req, res) => {
         .json({ success: false, message: "Conversation not found" });
     }
 
-
     // Check if user is an admin or the sender of the message
     const isAdmin =
       Array.isArray(conversation.admin_ids) &&
       conversation.admin_ids.includes(user_id);
     const isSender = message.sender_id.toString() === user_id;
 
-
     if (isAdmin || isSender) {
+      if (message.attachment.image && message.attachment.public_id) {
+        const deleteImage = await cloudinaryDeleteImage(
+          message.attachment.public_id
+        );
+        if (deleteImage !== "ok") {
+          return res.status(500).json({
+            success: false,
+            message: "Failed to delete image from Cloudinary",
+          });
+        }
+      }
+
       await Message.deleteOne({ _id: message_id });
       return res
         .status(200)
         .json({ success: true, message: "Message deleted successfully" });
     }
 
-
     // If the user is neither admin nor sender, deny access
     return res.status(403).json({
       success: false,
       message: "Not authorized to delete this message",
     });
-
   } catch (error) {
     return res
       .status(500)
       .json({ success: false, message: error.message || "Server error" });
   }
 };
+
+
 
 module.exports = { sendMessage, markSeenMessage, messageDelete };

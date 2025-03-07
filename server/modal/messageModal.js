@@ -50,6 +50,7 @@ const messageSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    is_updated: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
