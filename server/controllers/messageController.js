@@ -198,24 +198,18 @@ const updateMessage = async (req, res) => {
         { new: true } // Returns the updated document
       );
 
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Message updated successfully",
-          data:updatedMessage,
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Message updated successfully",
+        data: updatedMessage,
+      });
     }
 
     // Unauthorized case
-    return res
-      .status(403)
-      .json({
-        success: false,
-        message: "Not authorized to update this message",
-      });
-
-
+    return res.status(403).json({
+      success: false,
+      message: "Not authorized to update this message",
+    });
   } catch (error) {
     return res
       .status(500)
@@ -223,4 +217,103 @@ const updateMessage = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, markSeenMessage, deleteMessage, updateMessage };
+// message reaction
+const reactionsMessage = async (req, res) => {
+  try {
+    const { message_id } = req.params;
+    const { type } = req.body;
+    const sender_id = req.id; // Authenticated user's ID
+
+    // Validate input
+    if (!type) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Reaction type is required" });
+    }
+
+    // Find the message first
+    const message = await Message.findById(message_id);
+    if (!message) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Message not found" });
+    }
+
+    // Check if the user has already reacted with the same type
+    const reactionIndex = message.reactions.findIndex(
+      (r) => r.user_id.toString() === sender_id && r.type === type
+    );
+
+    let updatedMessage;
+    if (reactionIndex !== -1) {
+      // Remove existing reaction
+      updatedMessage = await Message.findByIdAndUpdate(
+        message_id,
+        { $pull: { reactions: { user_id: sender_id, type } } },
+        { new: true }
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Your reaction was removed",
+        updatedMessage,
+      });
+    }
+
+    // Add new reaction
+    updatedMessage = await Message.findByIdAndUpdate(
+      message_id,
+      { $push: { reactions: { user_id: sender_id, type } } },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "You reacted to this message",
+      updatedMessage,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
+  }
+};
+
+// get all reacted user
+const reactionUser = async (req, res) => {
+  try {
+    const { message_id } = req.params;
+
+    // Find the message first
+    const message = await Message.findById(message_id).populate({
+      path: "reactions.user_id", // Assuming user_id references the User model
+      select: "name avatar", // Customize fields you want to include
+    });
+    if (!message) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Message not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Reactions retrieved successfully",
+      total_reactions: message.reactions.length,
+      data: message.reactions,
+    });
+
+    
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
+  }
+};
+
+module.exports = {
+  sendMessage,
+  markSeenMessage,
+  deleteMessage,
+  updateMessage,
+  reactionsMessage,
+  reactionUser,
+};
