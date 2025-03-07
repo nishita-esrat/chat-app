@@ -111,7 +111,7 @@ const markSeenMessage = async (req, res) => {
 };
 
 // delete message by admin or sender id
-const messageDelete = async (req, res) => {
+const deleteMessage = async (req, res) => {
   try {
     const { message_id } = req.params;
     const user_id = req.id; // Assuming req.id is the authenticated user's ID
@@ -169,6 +169,58 @@ const messageDelete = async (req, res) => {
   }
 };
 
+// update message
+const updateMessage = async (req, res) => {
+  try {
+    const { message_id } = req.params;
+    const { text } = req.body;
+    const sender_id = req.id;
+
+    if (!text) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Message text is required" });
+    }
+
+    // Find the message first
+    const message = await Message.findById(message_id);
+    if (!message) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Message not found" });
+    }
+
+    // Check if the sender is updating their own message
+    if (message.sender_id.toString() === sender_id) {
+      const updatedMessage = await Message.findByIdAndUpdate(
+        message_id,
+        { $set: { text, is_updated: true } },
+        { new: true } // Returns the updated document
+      );
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Message updated successfully",
+          data:updatedMessage,
+        });
+    }
+
+    // Unauthorized case
+    return res
+      .status(403)
+      .json({
+        success: false,
+        message: "Not authorized to update this message",
+      });
 
 
-module.exports = { sendMessage, markSeenMessage, messageDelete };
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
+  }
+};
+
+module.exports = { sendMessage, markSeenMessage, deleteMessage, updateMessage };
