@@ -3,6 +3,7 @@ const Conversation = require("../modal/conversationModal");
 const Message = require("../modal/messageModal");
 const { createNotification } = require("../utility/notifications");
 
+// send message
 const sendMessage = async (req, res) => {
   try {
     const { conversation_id, receiver_id, shared_from, text, attachment } =
@@ -32,7 +33,7 @@ const sendMessage = async (req, res) => {
         image: uploadedImage.url,
         public_id: uploadedImage.public_id,
       };
-      notification_msg = "sent photo";
+      notification_msg = "sent a photo";
     }
 
     if (shared_from) {
@@ -80,4 +81,33 @@ const sendMessage = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage };
+// mark as unseen msg into seen msg
+const markSeenMessage = async (req, res) => {
+  try {
+    const { conversation_id } = req.body;
+    const receiver_id = req.id;
+
+    const seenMsg = await Message.updateMany(
+      {
+        conversation_id,
+        sender_id: { $ne: receiver_id },
+        is_seen: { $nin: [receiver_id] },
+      },
+      { $push: { is_seen: receiver_id } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Messages marked as seen.",
+      modifiedCount: seenMsg.modifiedCount,
+    });
+    
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
+  }
+};
+
+module.exports = { sendMessage, markSeenMessage };
