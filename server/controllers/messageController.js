@@ -101,7 +101,6 @@ const markSeenMessage = async (req, res) => {
       message: "Messages marked as seen.",
       modifiedCount: seenMsg.modifiedCount,
     });
-    
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -110,4 +109,57 @@ const markSeenMessage = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, markSeenMessage };
+// delete message by admin or sender id
+const messageDelete = async (req, res) => {
+  try {
+    const { message_id } = req.params;
+    const user_id = req.id; // Assuming req.id is the authenticated user's ID
+
+
+    // Find the message first
+    const message = await Message.findById(message_id);
+    if (!message) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Message not found" });
+    }
+
+
+    // Find the conversation
+    const conversation = await Conversation.findById(message.conversation_id);
+    if (!conversation) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Conversation not found" });
+    }
+
+
+    // Check if user is an admin or the sender of the message
+    const isAdmin =
+      Array.isArray(conversation.admin_ids) &&
+      conversation.admin_ids.includes(user_id);
+    const isSender = message.sender_id.toString() === user_id;
+
+
+    if (isAdmin || isSender) {
+      await Message.deleteOne({ _id: message_id });
+      return res
+        .status(200)
+        .json({ success: true, message: "Message deleted successfully" });
+    }
+
+
+    // If the user is neither admin nor sender, deny access
+    return res.status(403).json({
+      success: false,
+      message: "Not authorized to delete this message",
+    });
+
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
+  }
+};
+
+module.exports = { sendMessage, markSeenMessage, messageDelete };
