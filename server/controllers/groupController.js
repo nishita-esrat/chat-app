@@ -165,7 +165,6 @@ const removeMember = async (req, res) => {
       data: group,
       notification,
     });
-    
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -174,4 +173,70 @@ const removeMember = async (req, res) => {
   }
 };
 
-module.exports = { createGroup, addNewMember, removeMember };
+// make admin
+const makeAdmin = async (req, res) => {
+  try {
+    const { member, conversation_id } = req.body;
+    const user_id = req.id;
+
+    const conversation = await Conversation.findById(conversation_id);
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    // Check if user is an admin
+    if (!conversation.admin_ids.includes(user_id)) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to make admin this person",
+      });
+    }
+
+    // Check if the member is already in the group
+    if (!conversation.participants.includes(member)) {
+      return res.status(400).json({
+        success: false,
+        message: "User is not a participant in the group",
+      });
+    }
+
+    // Prevent admins to make admin who is already admin
+    if (conversation.admin_ids.includes(member)) {
+      return res.status(403).json({
+        success: false,
+        message: "User is already an admin",
+      });
+    }
+
+    const group = await Conversation.findByIdAndUpdate(
+      conversation_id,
+      { $addToSet: { admin_ids: member } },
+      { new: true } // Return updated conversation
+    );
+
+    const notification = await createNotification(
+      member,
+      user_id,
+      "group_activity",
+      `You have been made an admin in the group ${group.group_name}`
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `User made admin successfully in ${group.group_name}`,
+      data: group,
+      notification,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
+  }
+};
+
+module.exports = { createGroup, addNewMember, removeMember, makeAdmin };
