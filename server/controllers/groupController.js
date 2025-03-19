@@ -1,5 +1,6 @@
 const Conversation = require("../modal/conversationModal");
 const { createNotification } = require("../utility/notifications");
+const mongoose = require("mongoose");
 
 // new group
 const createGroup = async (req, res) => {
@@ -239,4 +240,104 @@ const makeAdmin = async (req, res) => {
   }
 };
 
-module.exports = { createGroup, addNewMember, removeMember, makeAdmin };
+// remove from admin
+const removeAdmin = async (req, res) => {
+  try {
+    const { member, conversation_id } = req.body;
+    const user_id = req.id;
+
+    const conversation = await Conversation.findById(conversation_id);
+
+    if (!conversation) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Conversation not found" });
+    }
+
+
+    if (!conversation.admin_ids.includes(user_id)) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to remove an admin",
+      });
+    }
+
+    if (!conversation.admin_ids.includes(member)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User is not an admin" });
+    }
+
+    // Ensure at least one admin remains
+    if (conversation.admin_ids.length === 1) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Cannot remove the last admin" });
+    }
+
+    // Update the conversation and remove the admin
+    const group = await Conversation.findByIdAndUpdate(
+      conversation_id,
+      { $pull: { admin_ids: member } }, // Removes member from admin_ids
+      { new: true }
+    );
+
+    notification = await createNotification(
+      member,
+      user_id,
+      "group_activity",
+      `You have been removed as an admin from the group ${group.group_name}`
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `User removed as admin successfully from ${group.group_name}`,
+      data: group,
+      notification,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
+  }
+};
+
+// get all group members
+const getAllGroupMembers = async (req, res) => {
+  try {
+    const { conversation_id } = req.params;
+    const user_id = req.id;
+
+    // Find the conversation where the user is a participant
+    const conversation = await Conversation.findOne({
+      _id: conversation_id,
+      participants: user_id,
+    })
+      .populate("participants", "name avatar.image")
+      .lean();
+
+    if (!conversation) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Conversation not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      members: conversation.participants,
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
+  }
+};
+
+module.exports = {
+  createGroup,
+  addNewMember,
+  removeMember,
+  makeAdmin,
+  removeAdmin,
+  getAllGroupMembers,
+};
