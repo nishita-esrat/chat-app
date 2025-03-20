@@ -47,4 +47,38 @@ const deleteNotification = async (req, res) => {
   }
 };
 
-module.exports = { allNotifications, deleteNotification };
+// update notification
+const readNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user_id = req.id;
+
+    const notification = await Notification.findByIdAndUpdate(
+      id,
+      { $push: { is_read_by: user_id } },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Notification marked as read",
+      data: notification,
+    });
+
+    
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
+  }
+};
+
+module.exports = { allNotifications, deleteNotification, readNotification };

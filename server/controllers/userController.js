@@ -30,7 +30,9 @@ const registration = async (req, res) => {
     const user = await User.create({ ...newUser });
     return res.status(201).json({ success: true, user });
   } catch (error) {
-    return res.status(500).json({ message: error.message || "Server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
   }
 };
 
@@ -73,7 +75,9 @@ const login = async (req, res) => {
         user: user,
       });
   } catch (error) {
-    return res.status(500).json({ message: error.message || "Server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: error.message || "Server error" });
   }
 };
 
