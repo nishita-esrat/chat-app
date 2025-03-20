@@ -6,6 +6,7 @@ const friendRouters = require("./routers/friendRoute");
 const noteRouters = require("./routers/noteRoute");
 const messagesRouters = require("./routers/messageRoute");
 const groupRouters  = require("./routers/groupRoute");
+const notificationRouters  = require("./routers/notificationRoute");
 const cloudinary = require("./utility/cloudinaryConfig");
 
 
@@ -38,6 +39,9 @@ app.use("/api/v1/notes", noteRouters);
 app.use("/api/v1/messages", messagesRouters);
 // group router 
 app.use("/api/v1/group", groupRouters);
+// notification router 
+app.use("/api/v1/notification", notificationRouters);
+
 
 
 

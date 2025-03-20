@@ -4,7 +4,7 @@ const Message = require("../modal/messageModal");
 const { createNotification } = require("../utility/notifications");
 const cloudinaryDeleteImage = require("../utility/deleteImage");
 
-// send message
+// send message one-one and group msg 
 const sendMessage = async (req, res) => {
   try {
     const { conversation_id, receiver_id, shared_from, text, attachment } =
@@ -64,7 +64,7 @@ const sendMessage = async (req, res) => {
     // if receiver_id offline or receiver_id online but don't see msg.then send notification
     const content = `${populatedMessage.sender_id.name} : ${notification_msg}`;
     const notification = await createNotification(
-      receiver_id,
+      receiver_id ? receiver_id : conversation.participants,
       sender_id,
       "message",
       content
@@ -73,6 +73,7 @@ const sendMessage = async (req, res) => {
     return res.status(201).json({
       success: true,
       data: newMessage,
+      notification
     });
   } catch (error) {
     return res.status(500).json({
@@ -308,6 +309,8 @@ const reactionUser = async (req, res) => {
       .json({ success: false, message: error.message || "Server error" });
   }
 };
+
+
 
 module.exports = {
   sendMessage,
