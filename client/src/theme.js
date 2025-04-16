@@ -9,7 +9,16 @@ const theme = createTheme({
       dark: "#cd678f",
       contrastText: "#890b44",
     },
-    fontFamily: `'Poppins', 'Roboto', 'Helvetica', 'Arial', sans-serif`,
+  },
+  typography: {
+    fontFamily: `"Winky Rough", sans-serif`,
+    body1: {
+      fontWeight: 300,
+    },
+    button: {
+      fontWeight: 600,
+      textTransform: "lowercase",
+    },
   },
 });
 
