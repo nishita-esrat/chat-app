@@ -1,11 +1,15 @@
-
-import React from 'react'
+import React from "react";
 import { Outlet } from "react-router";
+import  ThemeModeProvider  from "./context/ThemeModeContext";
 
 const App = () => {
   return (
-    <Outlet />
-  )
-}
+    <>
+      <ThemeModeProvider>
+        <Outlet />
+      </ThemeModeProvider>
+    </>
+  );
+};
 
-export default App
+export default App;
