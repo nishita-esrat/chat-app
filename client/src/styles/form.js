@@ -91,8 +91,8 @@ export const StyledTextField = styled(TextField)(({ theme }) => ({
 // theme mode
 export const ThemeMode = styled(Box)(({theme})=>({
   position: "fixed",
-  bottom: theme.spacing(4),
-  right: theme.spacing(4),
+  top: theme.spacing(2),
+  right: theme.spacing(2),
   zIndex: 1300,
 }))
 
