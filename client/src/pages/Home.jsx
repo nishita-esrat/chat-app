@@ -9,7 +9,7 @@ import Settings from "../components/Settings";
 const Home = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [activeView, setActiveView] = useState(isMobile ? "chat" : "list");
+  const [activeView, setActiveView] = useState("list");
 
   return (
     <Box
@@ -17,20 +17,26 @@ const Home = () => {
       display="flex"
       flexDirection={isMobile ? "column" : "row"}
     >
+      {/* laptop view */}
       {!isMobile && (
         <>
-          <Sidebar setActiveView={setActiveView} />
+          <Sidebar setActiveView={setActiveView} value={activeView} />
           {activeView === "list" && <ChatList />}
-          {activeView === "settings" && <Settings />}
+          {activeView === "notifications" && <Settings />}
+          {activeView === "friends" && <Settings />}
+          {activeView === "me" && <Settings />}
           <ChatWindow />
         </>
       )}
+      {/* mobile view */}
       {isMobile && (
         <>
           <Box flex={1}>
             {activeView === "list" && <ChatList />}
             {activeView === "chat" && <ChatWindow />}
-            {activeView === "settings" && <Settings />}
+            {activeView === "notifications" && <Settings />}
+            {activeView === "friends" && <Settings />}
+            {activeView === "me" && <Settings />}
           </Box>
 
           <MobileSidebar value={activeView} setActiveView={setActiveView} />

@@ -1,42 +1,59 @@
-import { Box, IconButton } from "@mui/material";
-import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
-import Settings from "@mui/icons-material/Settings";
+import { Box } from "@mui/material";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import Link from "@mui/material/Link";
 import ChatIcon from "@mui/icons-material/Chat";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
+import LogoutIcon from "@mui/icons-material/Logout";
+import Avatar from "@mui/material/Avatar";
+import Mode from "./Mode";
+import SidebarButton from "./SidebarButton";
+import { Container } from "../styles/sidebar";
 
-const Sidebar = ({ setActiveView }) => (
-  <Box
-    width={80}
-    display="flex"
-    flexDirection="column"
-    alignItems="center"
-    justifyContent={"space-between"}
-    py={2}
-    borderRight="1px solid"
-    borderColor="divider"
-    color="secondary"
-  >
-    <Box  >
+const Sidebar = ({ setActiveView, value }) => (
+  <Container>
+    <Box>
       <Link href="/" underline="none">
-      <ChatIcon color="secondary"/>
+        <ChatIcon color="secondary" />
       </Link>
     </Box>
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      gap={1}
-    >
-      <IconButton color="secondary" onClick={() => setActiveView("list")}>
+    <Box display="flex" flexDirection="column" gap={1}>
+      <SidebarButton
+        title="Chats"
+        active={value === "list"}
+        onClick={() => setActiveView("list")}
+      >
         <ChatBubbleOutlineOutlinedIcon />
-      </IconButton>
-      <IconButton color="secondary" onClick={() => setActiveView("settings")}>
-        <Settings />
-      </IconButton>
+      </SidebarButton>
+      <SidebarButton
+        title="Friends"
+        active={value === "friends"}
+        onClick={() => setActiveView("friends")}
+      >
+        <PeopleOutlineIcon />
+      </SidebarButton>
+      <SidebarButton
+        title="Notifications"
+        active={value === "notifications"}
+        onClick={() => setActiveView("notifications")}
+      >
+        <NotificationsNoneIcon />
+      </SidebarButton>
     </Box>
-    <Box></Box>
-  </Box>
+    <Box display="flex" flexDirection="column" gap={1}>
+      <Mode />
+      <SidebarButton
+        title="Profile"
+        active={value === "me"}
+        onClick={() => setActiveView("me")}
+      >
+        <Avatar src="/broken-image.jpg" sx={{ width: 24, height: 24 }} />
+      </SidebarButton>
+      <SidebarButton title="Logout" onClick={() => console.log("logout")}>
+        <LogoutIcon />
+      </SidebarButton>
+    </Box>
+  </Container>
 );
 
 export default Sidebar;
