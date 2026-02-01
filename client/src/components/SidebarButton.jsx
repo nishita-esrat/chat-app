@@ -13,7 +13,6 @@ const SidebarButton = ({ title, active = false, onClick, children }) => (
           fontSize: 12,
         },
       },
-
     }}
   >
     <IconButton onClick={onClick} sx={navButtonStyle(active)}>
