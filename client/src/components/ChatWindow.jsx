@@ -3,7 +3,7 @@ import {Box} from "@mui/material"
 
 const ChatWindow = () => {
   return (
-    <div>ChatWindow</div>
+    <Box  minHeight="100vh" width={"100vw"} sx={{backgroundColor:"primary.light"}} overflow={"hidden"}>chatwindow</Box>
   )
 }
 

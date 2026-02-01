@@ -1,10 +1,12 @@
 export const palette = (mode) => ({
   mode,
-  // primary: { main: mode === "light" ? "#F0F8FF" : "#121212" },
-  primary: { main: mode === "light" ? "#fff8f8" : "#121212" },
+  primary: {
+    light: mode === "light" ? "#fdedfc7d" : "#0a0b0f",
+    main: mode === "light" ? "#f4f1f4" : "#0f1115",
+    dark: mode === "light" ? "#fff0fc45" : "#14171e",
+  },
   secondary: {
-    // light: "#f6e9f0",
-    light:"#ffe4ed",
+    light: "#ffe4ed",
     main: "#d786b0",
     dark: "#cd678f",
     contrastText: "#890b44",
@@ -13,6 +15,6 @@ export const palette = (mode) => ({
     primary: mode === "light" ? "#0c0c0d" : "#ffffff",
     secondary: "#99989f",
     muted: "#5a5564",
-    hover:"#d786b014"
+    hover: "#d786b014",
   },
 });
