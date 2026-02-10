@@ -5,6 +5,8 @@ import MobileSidebar from "../components/MobileSidebar";
 import ChatList from "../components/ChatList";
 import ChatWindow from "../components/ChatWindow";
 import Settings from "../components/Settings";
+import Friend from "../components/Friend";
+import Notification from "../components/Notification";
 
 const Home = () => {
   const theme = useTheme();
@@ -22,9 +24,9 @@ const Home = () => {
         <>
           <Sidebar setActiveView={setActiveView} value={activeView} />
           {activeView === "list" && <ChatList />}
-          {activeView === "notifications" && <Settings />}
-          {activeView === "friends" && <Settings />}
-          {activeView === "me" && <Settings />}
+          {activeView === "notifications" && <Notification />}
+          {activeView === "friends" && <Friend />}
+          {activeView === "me" && <Notification />}
           <ChatWindow />
         </>
       )}
@@ -34,8 +36,8 @@ const Home = () => {
           <Box flex={1}>
             {activeView === "list" && <ChatList />}
             {activeView === "chat" && <ChatWindow />}
-            {activeView === "notifications" && <Settings />}
-            {activeView === "friends" && <Settings />}
+            {activeView === "notifications" && <Notification />}
+            {activeView === "friends" && <Friend />}
             {activeView === "me" && <Settings />}
           </Box>
 

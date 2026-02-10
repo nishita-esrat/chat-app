@@ -1,6 +1,8 @@
 import { styled } from "@mui/material/styles";
 import { Box } from "@mui/material";
 
+
+// for nav link
 export const navButtonStyle = (active) => ({
   transition: "background-color 0.5s ease",
   color: "secondary.main",
@@ -10,6 +12,8 @@ export const navButtonStyle = (active) => ({
   },
 });
 
+
+// for container
 export const Container = styled(Box)(({ theme }) => ({
   width: 80,
   display: "flex",

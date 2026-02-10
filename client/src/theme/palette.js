@@ -1,9 +1,9 @@
 export const palette = (mode) => ({
   mode,
   primary: {
-    light: mode === "light" ? "#fdedfc7d" : "#0a0b0f",
+    light: mode === "light" ? "#fff0fc45" : "#14171e",
     main: mode === "light" ? "#f4f1f4" : "#0f1115",
-    dark: mode === "light" ? "#fff0fc45" : "#14171e",
+    dark: mode === "light" ? "#fdedfc7d" : "#0a0b0f",
   },
   secondary: {
     light: "#ffe4ed",

@@ -1,11 +1,14 @@
-
-import React from 'react'
-import {Box} from "@mui/material"
+import React from "react";
+import { Box } from "@mui/material";
+import { SideContainer } from "../styles/sideContainer";
+import SideHeader from "./SideHeader";
 
 const ChatList = () => {
   return (
-    <Box minWidth={320} minHeight="100vh" sx={{backgroundColor:"primary.dark"}} overflow={"hidden"}>chatlist</Box>
-  )
-}
+   <SideContainer>
+    <SideHeader title="Chats"/>
+   </SideContainer>
+  );
+};
 
-export default ChatList
+export default ChatList;
